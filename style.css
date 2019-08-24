@@ -1,0 +1,37 @@
+
+
+.htmlcode {
+  display: inline-block;
+  height: auto;
+  width: 450px;
+
+}
+
+
+
+h2{
+  color: #c94c4c;
+  
+}
+
+h4{
+  background-color: #6b5b95;
+  color: white;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  
+}
+
+.shiny-input-panel{
+  background-color: black;
+  border: 0;
+}
+
+label.control-label{
+  color: white;
+}
+
+#selection {
+  background-color: black;
+}     

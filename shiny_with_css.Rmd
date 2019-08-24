@@ -1,0 +1,316 @@
+---
+title: "더 디테일한 shiny app 만들기"
+output: 
+  html_document:
+    css: style.css
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+<h2 style="background-color: #F5F5DC; color: black;">Shiny에서 HTML 사용하기</h2>
+---------------------------------------------------------------------------------------
+[html 태그 사용 정리](https://shiny.rstudio.com/articles/tag-glossary.html)
+
+
+
+<h2 style="background-color: #F5F5DC; color: black;">Shiny에서 CSS 사용하기</h2>
+---------------------------------------------------------------------------------------
+### 1. 색깔과 모양 바꾸기
+<p>html에서 CSS를 적용하는 가장 기초적인 방법은 태그 안에 <code>style</code> 코드를 넣어 적용하는 것입니다.(태그 안에 작성하는 방법 외에 <code>head</code> 영역에 작성하는 것과 외부파일에 작성하는 방법 등이 더 일반적)</p>
+```{}
+<p style="color:blue;">맺어, 내려온 있을 그들에게 말이다. 사라지지 없으면, 구하지 실현에 피어나기 청춘의 대고, 이 봄바람이다. 사는가 피에 굳세게 교향악이다. 품으며, 할지라도 행복스럽고 아니다. 이상은 풀이 새가 쓸쓸하랴? 피어나기 능히 지혜는 가는 이것이다. 것은 이상, 무엇이 만천하의 것이 이것은 없으면, 뿐이다. 온갖 그러므로 가지에 열락의 뼈 내는 사는가 되는 것이다. 풍부하게 심장은 장식하는 구하지 것이다.</p>
+```
+
+<p>아래는 일반적인 HTML 문서에서의 CSS 적용과 Shiny 안에서 CSS를 적용하는 방법을 비교한 것입니다. <code>names(shiny::tags)</code>로 확인 가능한 html 태그 사용이 가능합니다.</P>
+
+```{htmlcode}
+/*CSS in HTML document*/
+<head>
+<style>
+    /* tag level */
+    p {
+      color: red;
+    }
+    
+    /* class level */
+    .phase {
+      color: orange;
+    }
+    
+    /* id level */
+    #phase2 {
+      color: purple;
+    }
+  </style>
+</head>
+```
+
+```{htmlcode}
+/*CSS in Shiny app*/
+tags$head(tags$style(
+        HTML('
+        /* tag level */
+        p {
+          color: red;
+        }
+        
+        /* class level */
+        .phase {
+          color: orange;
+        }
+        
+        /* id level */
+        #phase2 {
+          color: purple;
+        }
+            }
+')))
+
+```
+
+```{}
+<body>
+<p class="phase">소리다.이것은 투명하되 넣는 것이다. 같이, 많이 원질이 그들은 피어나기 말이다. 구할 피어나는 것은 속에서 수 끝에 것이다. 풀밭에 맺어, 품에 속에서 뭇 있으랴? 황금시대의 곧 가치를 만천하의 길지 그것은 맺어, 것이다. 주며, 이상은 같은 길지 피가 가장 끓는 힘있다.</p>
+  
+<p id="phase2">동력은 이상의 이상은 사람은 이것이야말로 창공에 위하여서, 뭇 맺어, 철환하였는가? 웅대한 그들의 인생에 힘차게 길을 돋고, 작고 속잎나고, 위하여서. 굳세게 있는 크고 열매를 있는 소금이라 무엇을 우리 사람은 것이다. </p>
+</body>
+```
+
+
+
+외부 CSS 파일을 Shiny 에 적용하기 위해서는
+<ol>
+<li><code>tags</code> 함수를 사용하거나</li>
+<li><code>includeCSS</code>함수를 사용합니다.</li>
+</ol>
+
+```{html2}
+/*CSS in HTML doument*/
+<head>
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+```
+
+```{r echo=TRUE, eval=F}
+  tags$head(
+    tags$link(rel = "stylesheet", type = "text/css", href = "style.css")
+  )
+```
+
+```{r echo=TRUE, eval=F}
+  includeCSS("style.css")
+```
+<br>
+
+<h4> Shiny에 적용하기</h4>
+
+1) 수정하고 싶은 영역의 id, class 확인
+<p style="background-color: black; padding:2px;">![](https://drive.google.com/uc?id=158vTHK2ztsH7rQXziFBuXMAH0_5XaHXz)</p>
+<br>
+
+2) css 작성 
+```{html}
+.shiny-input-panel{
+  background-color: black;
+  border: 0;
+}
+
+label.control-label{
+  color: white;
+}
+
+#selection {
+  background-color: black;
+}     
+```
+
+```{r echo=T}
+inputPanel(id = "selection",
+  selectInput("n_breaks", label = "Number of bins:",
+              choices = c(10, 20, 35, 50), selected = 20),
+  
+  sliderInput("bw_adjust", label = "Bandwidth adjustment:",
+              min = 0.2, max = 2, value = 1, step = 0.2)
+)
+```
+
+<br>
+
+<h4>Bootstrap 테마 적용하기</h4>
+[bootswatch](http://bootswatch.com)에서 제공하는 테마를 패키지를 통해 적용할 수 있습니다. <code>shinythemes::shinythemes("darkly")</code>를 ```fluidPage()``` 또는 ```fixedPage()``` 안에 넣으면 전체 영역에 테마가 적용된는 것을 볼 수 있습니다. 적용할 수 있는 테마는
+```cerulean```, ```cosmo```, ```cyborg```, ```darkly```, ```flatly```, ```journal```, ```lumen```, ```paper```, ```readable```, ```sandstone```, ```simplex```, ```slate```, ```spacelab```, ```superhero```, ```united```, ```yeti``` 입니다.
+<br>
+
+
+
+### 2. 구조 바꾸기
+[shiny홈페이지의 article](https://shiny.rstudio.com/articles/layout-guide.html#grid-layouts-in-depth)을 참고하여 작성하였습니다.
+
+Shiny 앱은 <b>[Bootstrap](https://getbootstrap.com/)</b> 기반의 Grid 방식으로 구조를 생성합니다. 크게 유동적인 그리드와 고정적인 그리드로 구분됩니다. 
+
+<h4>Fluid Grid System</h4>
+
+<p>Bootstrap grid system은 12개 column을 활용하여 행과 열을 유연하게 세분할 수 있습니다. 유동적인 방식의 레이아웃을 만들기 위해서는 <code>fluidPage()</code> 함수를 사용합니다. 그리드 안에 행을 만들기 위해서는 <code>fluidRow()</code> 함수를 사용하고, 행 안에 열을 만들기 위해서는 <code>column()</code> 함수를 씁니다.</p>
+
+<p>![](https://shiny.rstudio.com/images/Shiny-Application-Layout-Guide-images/fluidGrid.png)</p>
+
+```{r eval=TRUE}
+ui <- fluidPage(
+  fluidRow(
+    column(2,
+      "sidebar"
+    ),
+    column(10,
+      "main"
+    )
+  )
+)
+```
+<br>
+<h5>Column Offsetting</h5>
+<p>UI 요소의 위치를 정확하게 제어하기 위해 열의 위치를 <code>offset</code>할 수도 있습니다. <code>column()</code> 함수에 offset 매개변수를 추가하여 열을 오른쪽으로 이동합니다. 각 offset 단위는 열의 왼쪽 여백을 전체 열만큼 증가시킵니다. </p>
+<p>![](https://shiny.rstudio.com/images/Shiny-Application-Layout-Guide-images/fluidOffsetting.png)</p>
+
+```{r echo=TRUE}
+ui <- fluidPage(
+  fluidRow(
+    column(4,
+      "4"
+    ),
+    column(4, offset = 4,
+      "4 offset 4"
+    )      
+  ),
+  fluidRow(
+    column(3, offset = 3,
+      "3 offset 3"
+    ),
+    column(3, offset = 3,
+      "3 offset 3"
+    )  
+  )
+)
+
+```
+<br>
+<h5>Column Nesting</h5>
+<span>유동적인 그리드 내에 열울 중첩하면 중첩된 열 내에서 최대 12개의 열이 추가 됩니다. 유동 그리드를 너비를 설정하기 위해 픽셀이 아닌 백분율을 사용하기 때문입니다.</span>
+
+
+<p>![](https://shiny.rstudio.com/images/Shiny-Application-Layout-Guide-images/fluidNesting.png)</p>
+
+```{r echo=TRUE}
+ui <- fluidPage(
+  fluidRow(
+    column(12,
+      "Fluid 12",
+      fluidRow(
+        column(6,
+          "Fluid 6",
+          fluidRow(
+            column(6, 
+              "Fluid 6"),
+            column(6,
+              "Fluid 6")
+          )
+        ),
+        column(width = 6,
+          "Fluid 6")
+      )
+    )
+  )
+)
+```
+
+<br><br>
+<h4>Fixed Grid System</h4>
+<p>고정 그리드 방식은 12개의 열을 사용하며 기본적으로 고정 너비 940px을 유지합니다. 부트스트랩 응답이 활성화 된 경우 그리드는 Viewport(모바일,태블릿...)에 따라 너비가 724 또는 1170px로 조정됩니다.</p>
+
+<p>고정 그리드의 주요 장점은 사용자가 원하는 UI 배치에 대해 보장한다는 점입니다(브라우저 너비에 따라 동적으로 배치되지 않기 때문). 주요 단점은 작업하기가 더 복잡하는 것입니다. 일반적으로 고정 그리드에서 제공하는 하위레벨 레이아웃 제어가 절대적으로 필요한 경우가 아니라면 유동적인 그리드를 사용하는 게 좋습니다.</p>
+
+<br>
+<h5>Using Fixed Grids</h5>
+Shiny에서 고정 그리드를 사용하면 유동 그리드와 거의 동일하게 작동합니다. 차이점은 아래와 같음.
+
+<li><code>fixedPage()</code>와 <code>fixedRow()</code>함수를 사용하여 그리드를 작성합니다.</li>
+<li>행은 중접 될 수 있지만 유동그리드에서처럼  각 중첩 수준에서 12로 재설정하지 않고 부모 열의 수를 더하는 열 집합을 항상 포함해야 합니다</li>
+
+```{r}
+ui <- fixedPage(
+  fixedRow(
+    column(2,
+      "sidebar"
+    ),
+    column(10,
+      "main"
+    )
+  )
+)
+```
+<h5>Column Nesting</h5>
+<p>고정그리드에서 중첩된 각 열의 너비는 부모 column 수의 합과 같아야 합니다. 다음은 너비 6과 3의 다른 두 column을 포함하는 너비 9인 열이 있는 <code>fixedRow()</code>입니다.</p>
+![](https://shiny.rstudio.com/images/Shiny-Application-Layout-Guide-images/fixedNesting.png)
+<br>
+
+```{r eval=FALSE}
+fixedRow(
+  column(9,
+    "Level 1 column",
+    fixedRow(
+      column(6,
+        "Level 2"
+      ),
+      column(3,
+        "Level 2"
+      )
+    )
+  )
+)
+```
+
+<h5>Responsive Layout</h5>
+<p>부트스트랩 그리드 방식은 반응형 CSS를 지원하므로 app을 자동으로 조정하여 다양한 크기의 장치에서 볼 수 있습니다. 반응형 레이아웃에는 다음이 포합됩니다.</p>
+
+<ol>
+<li>그리드에서 열 너비 수정</li>
+<li>필요에 따라 float 대신 elements를 쌓음</li>
+<li>장치에 더 적합한 제목과 텍스트 크기 조정</li>
+</ol>
+
+반응형 레이아웃은 기본적으로 모든 Shiny 페이지 유형에 사용됩니다. 반응형 레이아웃을 비활성화하려면  <code>fluidPage()</code> 또는 <code>fixedPage()</code> 에서 <code>responsive=FALSE</code> 설정을 사용합니다.
+
+<h5>Supported Devices</h5>
+반응형 레이아웃이 활성화 된 후 부트스트랩 그리드 방식이 다양한 디바이스에 적용 되는 방법입니다. 
+
+|Layout width|Column width|Gutter width|
+|---|---|---|
+|Large display|1200pxand up|70px|30px|
+|Default|980px and up|60px|20px|
+|Portrait tablets|768px and above|42px|20px|
+|Phones to tablets|767px and below|Fluid (no fixed widths)|Fluid (no fixed widths)|
+|Phones|480px and below|Fluid (no fixed widths)|Fluid (no fixed widths)|
+작은 화면 크기에서는 페이지에서 고정 그리드 레이아웃을 사용하더라도 유동적인 열 너비가 자동으로 사용됩니다.
+<br>
+
+<h4>Application Themes</h4>
+<p>Shiny app은 Shiny가 기반으로 하는 Bootstrap 웹프레임 워크의 기본 테마를 상속합니다. App의 형상을 변경하기 위해서 다른 Bootstrap 테마를 지정할 수 있습니다. App에 사용할 Bootstrap CSS style 시트를 <code>fluidPage()</code>, <code>fixedPage()</code>, <code>navbarPage()</code> 에 지정하여 사용 할 수 있습니다.</p>
+
+<p>부트스트랩 테마는 일반적으로 단일 CSS 소스 파일을 사용하여 지정됩니다. App 디렉토리 내에 <code>www/bootstrap.css</code>위치에 테마를 저장 한 경우 다음 코드를 사용</p>
+```{r echo=TRUE}
+ui <- fluidPage(theme = "bootstrap.css",
+                  
+  titlePanel("My Application")
+)
+```
+
+[부트스트랩 사용법 자세히 보기](https://www.w3schools.com/bootstrap4/default.asp)
+
+
+<h2 style="background-color: #F5F5DC; color: black;">Shiny에서 javascript 사용하기</h2>
+---------------------------------------------------------------------------------------
+ 나중에..
+
+
